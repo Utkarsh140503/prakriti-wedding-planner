@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { subscribeTasks, createTask, updateTask, removeTask, seedTemplateTasks } from '../services/tasks'
 import { WEDDING_FUNCTIONS } from '../data/functions'
 import { TEMPLATE_TASKS } from '../data/templates'
@@ -11,6 +12,9 @@ export default function Checklist() {
   const { user } = useAuth(); const [tasks, setTasks] = useState<WeddingTask[]>([])
   const [members, setMembers] = useState<AppUser[]>([]); const [selected, setSelected] = useState<WeddingTask | null>(null)
   const [view, setView] = useState<'table'|'kanban'|'function'|'member'|'mine'>('table'); const [q, setQ] = useState(''); const [fn, setFn] = useState('all'); const [msg, setMsg] = useState('')
+  const [params, setParams] = useSearchParams(); const presetStatus = params.get('status'); const presetFilter = params.get('filter')
+  const [statusF, setStatusF] = useState<string>(presetStatus || (presetFilter === 'overdue' ? 'Overdue' : 'all'))
+  useEffect(() => { if (presetStatus) setStatusF(presetStatus); else if (presetFilter === 'overdue') setStatusF('Overdue') }, [presetStatus, presetFilter])
   useEffect(() => subscribeUsers(setMembers), [])
   function exportCsv() {
     const rows = [['Title','Function','Category','Owner','Priority','Status','Deadline','Estimated Cost','Actual Cost','Payment Status'], ...filtered.map(x => [x.title, fname(x.functionId), x.category || '', x.ownerName, x.priority, x.status, x.deadline || '', String(x.estimatedCost ?? ''), String(x.actualCost ?? ''), x.paymentStatus || ''])]
@@ -26,6 +30,7 @@ export default function Checklist() {
   return <div>
     <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
       <h2 className="text-2xl font-bold text-[#6E1423]">Master Checklist</h2>
+    {statusF !== 'all' && <div className="font-sans text-sm bg-[#F5EEDD] border border-[#D9C07A] rounded-lg px-3 py-2 mb-3 flex justify-between items-center"><span>Showing only: <b>{statusF === 'Not Started' ? 'Pending (Not Started)' : statusF}</b> tasks — {filtered.length} of {tasks.length}</span><button className="underline" onClick={() => { setStatusF('all'); setParams({}) }}>Show all tasks</button></div>}
       <div className="font-sans text-sm flex flex-wrap gap-2">
         {([['table','Table'],['kanban','Kanban'],['function','Function-wise'],['member','Member-wise'],['mine','My Responsibilities']] as const).map(([v, label]) => <button key={v} onClick={() => setView(v)} className={`px-3 py-1.5 rounded-lg border ${view===v?'bg-[#6E1423] text-white':'bg-white'}`}>{label}</button>)}
         <button onClick={exportCsv} className="px-3 py-1.5 rounded-lg border bg-[#B8912F] text-white">Export CSV</button>
@@ -33,6 +38,7 @@ export default function Checklist() {
     </div>
     <div className="flex flex-wrap gap-2 mb-4 font-sans">
       <input className="input !w-64" placeholder="Search tasks…" value={q} onChange={e=>setQ(e.target.value)} />
+      <select className="input !w-auto" value={statusF} onChange={e => setStatusF(e.target.value)}><option value="all">All statuses</option>{['Not Started','In Progress','Completed','On Hold','Cancelled','Overdue'].map(x => <option key={x}>{x}</option>)}</select>
       <select className="input !w-64" value={fn} onChange={e=>setFn(e.target.value)}><option value="all">All functions</option>{WEDDING_FUNCTIONS.map(f=><option key={f.id} value={f.id}>{f.code}. {f.name}</option>)}</select>
       {user?.role==='ADMIN' && !tasks.length && <button className="btn-gold" onClick={async()=>{ await seedTemplateTasks(TEMPLATE_TASKS, user.uid); setMsg('Template checklist imported — all tasks are editable, unassigned templates.') }}>Import template checklist ({TEMPLATE_TASKS.length} tasks)</button>}
     </div>
