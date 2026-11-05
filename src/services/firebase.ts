@@ -16,7 +16,7 @@ const firebaseConfig = {
 // of crashing silently to a blank page (fixed 5 Nov 2026).
 export const firebaseInitError: string | null =
   !firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId || !firebaseConfig.appId
-    ? 'Firebase configuration is missing in this build. Add the six VITE_FIREBASE_* repository secrets in GitHub (Settings \u2192 Secrets and variables \u2192 Actions) and re-run the deployment workflow.'
+    ? 'Firebase configuration is missing in this build. Add the six VITE_FIREBASE_* repository secrets in GitHub (Settings → Secrets and variables → Actions) and re-run the deployment workflow.'
     : null
 
 let app: FirebaseApp | undefined
