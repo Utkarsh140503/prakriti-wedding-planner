@@ -10,6 +10,8 @@ import FamilyPage from './pages/FamilyPage'
 import BudgetPage from './pages/BudgetPage'
 import VendorsPage from './pages/VendorsPage'
 import { ShoppingPage, SamagriPage } from './pages/ItemsPages'
+import GuestsPage from './pages/GuestsPage'
+import SchedulePage from './pages/SchedulePage'
 import { LoginPage, RegisterPage } from './pages/AuthPages'
 function Guard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -24,11 +26,11 @@ export default function App() {
       <Route path="/functions" element={<FunctionsList />} /><Route path="/functions/:id" element={<FunctionDetail />} />
       <Route path="/family" element={<FamilyPage />} />
       <Route path="/budget" element={<BudgetPage />} />
-      <Route path="/guests" element={<Placeholder title="Guest Management" phase="Phase 4" />} />
+      <Route path="/guests" element={<GuestsPage />} />
       <Route path="/vendors" element={<VendorsPage />} />
       <Route path="/shopping" element={<ShoppingPage />} />
       <Route path="/samagri" element={<SamagriPage />} />
-      <Route path="/schedule" element={<Placeholder title="Event Schedule" phase="Phase 4" />} />
+      <Route path="/schedule" element={<SchedulePage />} />
       <Route path="/documents" element={<DocumentsPage />} />
       <Route path="/activity" element={<Placeholder title="Activity History" phase="Phase 5" />} />
       <Route path="/settings" element={<Placeholder title="Settings" phase="Phase 1 (admin invitations are managed in Firestore — see README)" />} />
