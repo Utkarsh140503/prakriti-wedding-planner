@@ -3,11 +3,21 @@ import { subscribeTasks, createTask, updateTask, removeTask, seedTemplateTasks }
 import { WEDDING_FUNCTIONS } from '../data/functions'
 import { TEMPLATE_TASKS } from '../data/templates'
 import { useAuth } from '../contexts/AuthContext'
-import type { WeddingTask, TaskStatus } from '../types'
+import { subscribeUsers } from '../services/users'
+import TaskPanel from '../components/tasks/TaskPanel'
+import type { AppUser, WeddingTask, TaskStatus } from '../types'
 const STATUSES: TaskStatus[] = ['Not Started','In Progress','Completed','On Hold','Cancelled']
 export default function Checklist() {
   const { user } = useAuth(); const [tasks, setTasks] = useState<WeddingTask[]>([])
-  const [view, setView] = useState<'table'|'kanban'|'mine'>('table'); const [q, setQ] = useState(''); const [fn, setFn] = useState('all'); const [msg, setMsg] = useState('')
+  const [members, setMembers] = useState<AppUser[]>([]); const [selected, setSelected] = useState<WeddingTask | null>(null)
+  const [view, setView] = useState<'table'|'kanban'|'function'|'member'|'mine'>('table'); const [q, setQ] = useState(''); const [fn, setFn] = useState('all'); const [msg, setMsg] = useState('')
+  useEffect(() => subscribeUsers(setMembers), [])
+  function exportCsv() {
+    const rows = [['Title','Function','Category','Owner','Priority','Status','Deadline','Estimated Cost','Actual Cost','Payment Status'], ...filtered.map(x => [x.title, fname(x.functionId), x.category || '', x.ownerName, x.priority, x.status, x.deadline || '', String(x.estimatedCost ?? ''), String(x.actualCost ?? ''), x.paymentStatus || ''])]
+    const csv = rows.map(r => r.map(c => '"' + String(c).replaceAll('"', '""') + '"').join(',')).join('\n')
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'prakriti-master-checklist.csv'; a.click(); URL.revokeObjectURL(a.href)
+  }
+  const groups = (key: (x: WeddingTask) => string) => { const m = new Map<string, WeddingTask[]>(); filtered.forEach(x => { const k = key(x); m.set(k, [...(m.get(k) || []), x]) }); return [...m.entries()] }
   const [form, setForm] = useState({ title: '', functionId: 'pre-wedding', ownerName: '', priority: 'Medium' as WeddingTask['priority'], deadline: '' })
   useEffect(() => subscribeTasks(setTasks), [])
   const filtered = useMemo(() => tasks.filter(t => (fn==='all'||t.functionId===fn) && (view!=='mine'||t.ownerId===user?.uid||t.ownerName===user?.displayName) && t.title.toLowerCase().includes(q.toLowerCase())), [tasks, fn, q, view, user])
@@ -16,8 +26,9 @@ export default function Checklist() {
   return <div>
     <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
       <h2 className="text-2xl font-bold text-[#6E1423]">Master Checklist</h2>
-      <div className="font-sans text-sm space-x-2">
-        {(['table','kanban','mine'] as const).map(v => <button key={v} onClick={() => setView(v)} className={`px-3 py-1.5 rounded-lg border ${view===v?'bg-[#6E1423] text-white':'bg-white'}`}>{v==='mine'?'My Responsibilities':v[0].toUpperCase()+v.slice(1)}</button>)}
+      <div className="font-sans text-sm flex flex-wrap gap-2">
+        {([['table','Table'],['kanban','Kanban'],['function','Function-wise'],['member','Member-wise'],['mine','My Responsibilities']] as const).map(([v, label]) => <button key={v} onClick={() => setView(v)} className={`px-3 py-1.5 rounded-lg border ${view===v?'bg-[#6E1423] text-white':'bg-white'}`}>{label}</button>)}
+        <button onClick={exportCsv} className="px-3 py-1.5 rounded-lg border bg-[#B8912F] text-white">Export CSV</button>
       </div>
     </div>
     <div className="flex flex-wrap gap-2 mb-4 font-sans">
@@ -32,13 +43,17 @@ export default function Checklist() {
       <input className="input" placeholder="Primary owner" value={form.ownerName} onChange={e=>setForm({...form,ownerName:e.target.value})} />
       <span className="flex gap-2"><input className="input" type="date" value={form.deadline} onChange={e=>setForm({...form,deadline:e.target.value})} /><button className="btn-primary shrink-0">Add</button></span>
     </form>}
-    {view==='kanban' ? <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-3">
+    {view==='function' || view==='member' ? <div className="space-y-4">
+      {groups(view==='function' ? (x) => fname(x.functionId) : (x) => x.ownerName).map(([g, items]) => <div key={g} className="card p-4"><h4 className="font-bold text-[#6E1423] mb-2">{g} <span className="font-sans text-xs font-normal">({items.filter(i => i.status==='Completed').length}/{items.length} done)</span></h4>
+        {items.map(x => <button key={x.id} onClick={() => setSelected(x)} className="w-full text-left font-sans text-sm border-b border-[#F5EEDD] py-1.5 flex justify-between gap-3"><span className="font-semibold">{x.title}</span><span className="text-xs shrink-0">{x.status} \u00B7 {x.priority}</span></button>)}</div>)}
+      {!filtered.length && <p className="font-sans text-sm opacity-70">No tasks match.</p>}
+    </div> : view==='kanban' ? <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-3">
       {STATUSES.map(st => <div key={st} className="card p-3"><h4 className="font-sans font-bold text-sm text-[#6E1423] mb-2">{st} ({filtered.filter(t=>t.status===st).length})</h4>
-        {filtered.filter(t=>t.status===st).map(t=><div key={t.id} className="border border-[#EADFC6] rounded-lg p-2 mb-2 font-sans text-sm"><p className="font-semibold">{t.title}</p><p className="text-xs opacity-70">{fname(t.functionId)} · {t.ownerName}</p></div>)}</div>)}
+        {filtered.filter(t=>t.status===st).map(t=><button key={t.id} onClick={() => setSelected(t)} className="w-full text-left border border-[#EADFC6] rounded-lg p-2 mb-2 font-sans text-sm bg-white"><p className="font-semibold">{t.title}</p><p className="text-xs opacity-70">{fname(t.functionId)} · {t.ownerName}</p></button>)}</div>)}
     </div> : <div className="card overflow-x-auto"><table className="w-full font-sans text-sm min-w-[720px]">
       <thead><tr className="text-left bg-[#F5EEDD]">{['Task','Function','Owner','Priority','Status','Deadline',''].map(h=><th key={h} className="p-3">{h}</th>)}</tr></thead>
       <tbody>{filtered.map(t=><tr key={t.id} className="border-t border-[#F5EEDD]">
-        <td className="p-3 font-semibold">{t.title}{t.isTemplate && <span className="ml-2 text-[10px] bg-[#F5EEDD] px-1.5 py-0.5 rounded">TEMPLATE</span>}</td>
+        <td className="p-3 font-semibold"><button className="underline decoration-[#D9C07A] underline-offset-2 text-left" onClick={() => setSelected(t)}>{t.title}</button>{t.isTemplate && <span className="ml-2 text-[10px] bg-[#F5EEDD] px-1.5 py-0.5 rounded">TEMPLATE</span>}</td>
         <td className="p-3">{fname(t.functionId)}</td><td className="p-3">{t.ownerName}</td>
         <td className="p-3">{t.priority}</td>
         <td className="p-3">{canWrite ? <select className="border rounded px-1 py-1" value={t.status} onChange={e=>updateTask(t.id!,{status:e.target.value as TaskStatus})}>{STATUSES.map(s=><option key={s}>{s}</option>)}</select> : t.status}</td>
@@ -46,6 +61,7 @@ export default function Checklist() {
         <td className="p-3">{user?.role==='ADMIN' && <button className="text-red-700 underline text-xs" onClick={()=>{ if(confirm('Delete this task?')) removeTask(t.id!) }}>Delete</button>}</td></tr>)}
       {!filtered.length && <tr><td colSpan={7} className="p-6 text-center opacity-70">No tasks yet. {user?.role==='ADMIN' ? 'Import the template checklist above, or add the first task.' : 'Tasks will appear here once added.'}</td></tr>}
       </tbody></table></div>}
-    <p className="font-sans text-xs opacity-60 mt-3">Function-wise and member-wise views: use the function filter above; member view = filter by owner in My Responsibilities after tasks are assigned to you.</p>
+    <p className="font-sans text-xs opacity-60 mt-3">Tap any task title to open full details \u2014 edit every field, assign a primary owner from the family list, and discuss it in comments. All changes sync in real time.</p>
+    {selected && <TaskPanel task={selected} members={members} onClose={() => setSelected(null)} />}
   </div>
 }
