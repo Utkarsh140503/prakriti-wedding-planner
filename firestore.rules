@@ -1,0 +1,97 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function profile() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function isMember() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && profile().status == 'active';
+    }
+    function isAdmin() { return isMember() && profile().role == 'ADMIN'; }
+    function canWrite() { return isMember() && profile().role != 'VIEWER'; }
+
+    // Admin pre-approved emails. A user may read ONLY the invitation whose
+    // document ID equals their own authenticated email (used at registration).
+    match /invitations/{email} {
+      allow read: if signedIn() && request.auth.token.email == email;
+      allow create, update, delete: if isAdmin();
+    }
+    // Bootstrap exception is handled OUTSIDE the app: the project owner creates
+    // the first invitation + this rule lets that first user self-create their
+    // profile only when an approved invitation for their email exists and the
+    // role in the profile exactly matches the invitation role.
+    match /users/{uid} {
+      allow read: if isMember() || (signedIn() && request.auth.uid == uid);
+      allow create: if signedIn() && request.auth.uid == uid
+        && exists(/databases/$(database)/documents/invitations/$(request.auth.token.email))
+        && get(/databases/$(database)/documents/invitations/$(request.auth.token.email)).data.status == 'approved'
+        && get(/databases/$(database)/documents/invitations/$(request.auth.token.email)).data.role == request.resource.data.role
+        && request.resource.data.status == 'active';
+      allow update: if isAdmin()
+        || (signedIn() && request.auth.uid == uid && request.resource.data.role == resource.data.role);
+      allow delete: if isAdmin();
+    }
+    match /weddingSettings/{doc} {
+      allow read: if isMember();
+      allow write: if isAdmin();
+    }
+    match /functions/{doc} {
+      allow read: if isMember();
+      allow write: if canWrite();
+    }
+    match /tasks/{doc} {
+      allow read: if isMember();
+      allow create, update: if canWrite();
+      allow delete: if isAdmin();
+    }
+    match /expenses/{doc} {
+      allow read: if isMember();
+      allow create, update: if canWrite();
+      allow delete: if isAdmin();
+    }
+    match /guests/{doc} {
+      allow read: if isMember();
+      allow create, update: if canWrite();
+      allow delete: if isAdmin();
+    }
+    match /vendors/{doc} {
+      allow read: if isMember();
+      allow create, update: if canWrite();
+      allow delete: if isAdmin();
+    }
+    match /shoppingItems/{doc} {
+      allow read: if isMember();
+      allow create, update: if canWrite();
+      allow delete: if isAdmin();
+    }
+    match /ritualItems/{doc} {
+      allow read: if isMember();
+      allow create, update: if canWrite();
+      allow delete: if isAdmin();
+    }
+    match /eventSchedule/{doc} {
+      allow read: if isMember();
+      allow create, update: if canWrite();
+      allow delete: if isAdmin();
+    }
+    // Documents store Google Drive links + metadata only (no Firebase Storage).
+    match /documents/{doc} {
+      allow read: if isMember();
+      allow create, update: if canWrite();
+      allow delete: if isAdmin();
+    }
+    match /activityLogs/{doc} {
+      allow read: if isMember();
+      allow create: if isMember();
+      allow update, delete: if false;
+    }
+    match /notifications/{doc} {
+      allow read: if isMember();
+      allow create: if isMember();
+      allow update: if isMember();
+      allow delete: if isAdmin();
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}
