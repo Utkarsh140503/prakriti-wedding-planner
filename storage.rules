@@ -1,0 +1,9 @@
+// Firebase Storage is NOT used in this project (Spark plan; Storage requires Blaze).
+// File storage model: Google Drive links stored in Firestore (see README).
+// This file is kept as an explicit deny-all guard in case a bucket is ever provisioned.
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} { allow read, write: if false; }
+  }
+}
