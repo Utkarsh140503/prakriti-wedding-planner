@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard'
 import Checklist from './pages/Checklist'
 import Placeholder from './pages/Placeholder'
 import DocumentsPage from './pages/DocumentsPage'
+import { FunctionsList, FunctionDetail } from './pages/FunctionsPage'
 import { LoginPage, RegisterPage } from './pages/AuthPages'
 function Guard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -16,7 +17,7 @@ export default function App() {
     <Route path="/login" element={<LoginPage />} /><Route path="/register" element={<RegisterPage />} />
     <Route element={<Guard><AppLayout /></Guard>}>
       <Route path="/" element={<Dashboard />} /><Route path="/checklist" element={<Checklist />} />
-      <Route path="/functions" element={<Placeholder title="Wedding Functions" phase="Phase 2" />} />
+      <Route path="/functions" element={<FunctionsList />} /><Route path="/functions/:id" element={<FunctionDetail />} />
       <Route path="/family" element={<Placeholder title="Family Members" phase="Phase 3" />} />
       <Route path="/budget" element={<Placeholder title="Budget & Expenses" phase="Phase 3" />} />
       <Route path="/guests" element={<Placeholder title="Guest Management" phase="Phase 4" />} />
