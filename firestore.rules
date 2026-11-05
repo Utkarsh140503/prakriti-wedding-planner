@@ -14,7 +14,7 @@ service cloud.firestore {
     // Admin pre-approved emails. A user may read ONLY the invitation whose
     // document ID equals their own authenticated email (used at registration).
     match /invitations/{email} {
-      allow read: if signedIn() && request.auth.token.email == email;
+      allow read: if isAdmin() || (signedIn() && request.auth.token.email == email);
       allow create, update, delete: if isAdmin();
     }
     // Bootstrap exception is handled OUTSIDE the app: the project owner creates
