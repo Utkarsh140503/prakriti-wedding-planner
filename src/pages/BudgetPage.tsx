@@ -8,7 +8,7 @@ import { useAuth } from '../contexts/AuthContext'
 import type { Expense } from '../types'
 const COLORS = ['#6E1423','#B8912F','#2E5E4E','#8A6D3B','#A26769','#5B7C99','#946846','#7A8B6F','#C08552','#4A4E69']
 const inr = (n?: number) => '₹' + (n || 0).toLocaleString('en-IN')
-const empty: Expense = { title: '', category: 'Other', functionId: 'wedding' }
+const empty: Expense = { title: '', category: 'Other', functionId: 'main-wedding' }
 export default function BudgetPage() {
   const { user } = useAuth(); const [rows, setRows] = useState<(Expense & { id: string })[]>([])
   const [settings, setSettings] = useState<Record<string, unknown>>({}); const [budgetInput, setBudgetInput] = useState('')
