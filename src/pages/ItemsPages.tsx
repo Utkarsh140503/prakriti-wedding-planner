@@ -9,7 +9,7 @@ const fname = (id: string) => WEDDING_FUNCTIONS.find(f => f.id === id)?.name || 
 
 export function ShoppingPage() {
   const { user } = useAuth(); const [rows, setRows] = useState<(ShopItem & { id: string })[]>([])
-  const [name, setName] = useState(''); const [person, setPerson] = useState('Groom'); const [fn, setFn] = useState('wedding'); const [filter, setFilter] = useState('all'); const [msg, setMsg] = useState('')
+  const [name, setName] = useState(''); const [person, setPerson] = useState('Groom'); const [fn, setFn] = useState('main-wedding'); const [filter, setFilter] = useState('all'); const [msg, setMsg] = useState('')
   useEffect(() => subscribeCollection<ShopItem>('shoppingItems', setRows), [])
   const canWrite = user && user.role !== 'VIEWER'; const shown = filter === 'all' ? rows : rows.filter(r => r.status === filter)
   const pending = rows.filter(r => !['Purchased','Delivered','Cancelled'].includes(r.status)).length
@@ -34,7 +34,7 @@ export function ShoppingPage() {
 
 export function SamagriPage() {
   const { user } = useAuth(); const [rows, setRows] = useState<(RitualItem & { id: string })[]>([])
-  const [name, setName] = useState(''); const [hindi, setHindi] = useState(''); const [fn, setFn] = useState('wedding'); const [msg, setMsg] = useState('')
+  const [name, setName] = useState(''); const [hindi, setHindi] = useState(''); const [fn, setFn] = useState('main-wedding'); const [msg, setMsg] = useState('')
   useEffect(() => subscribeCollection<RitualItem>('ritualItems', setRows), [])
   const canWrite = user && user.role !== 'VIEWER'
   const groups = new Map<string, (RitualItem & { id: string })[]>(); rows.forEach(r => groups.set(r.functionId, [...(groups.get(r.functionId) || []), r]))
