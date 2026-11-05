@@ -10,12 +10,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   useEffect(() => onAuthStateChanged(auth, async (fb) => {
     if (!fb) { setUser(null); setLoading(false); return }
-    const snap = await getDoc(doc(db, 'users', fb.uid))
-    if (snap.exists()) { const d = snap.data() as AppUser; if (d.status === 'active') setUser({ ...d, uid: fb.uid }); else { await signOut(auth); setUser(null) } }
-    else setUser(null)
+    setLoading(true)
+    try {
+      const snap = await getDoc(doc(db, 'users', fb.uid))
+      if (snap.exists()) { const d = snap.data() as AppUser; if (d.status === 'active') setUser({ ...d, uid: fb.uid }); else { await signOut(auth); setUser(null) } }
+      else setUser(null)
+    } catch (e) { console.error('Failed to load user profile', e); setUser(null) }
     setLoading(false)
   }), [])
-  async function login(email: string, password: string) { await signInWithEmailAndPassword(auth, email.trim(), password) }
+  async function login(email: string, password: string) {
+    const cred = await signInWithEmailAndPassword(auth, email.trim(), password)
+    // Load the profile NOW and set it before the caller navigates, otherwise the
+    // route guard can bounce the user back to /login before the auth listener
+    // finishes fetching the profile (bug reported 5 Nov 2026: "login does nothing").
+    const snap = await getDoc(doc(db, 'users', cred.user.uid))
+    if (!snap.exists()) { await signOut(auth); throw new Error('Your account profile was not found. If you just registered, please register again \u2014 or ask the admin to check your invitation.') }
+    const d = snap.data() as AppUser
+    if (d.status !== 'active') { await signOut(auth); throw new Error('This account is not active. Please ask the administrator.') }
+    setUser({ ...d, uid: cred.user.uid })
+  }
   async function register(email: string, password: string, displayName: string) {
     const e = email.trim().toLowerCase()
     const cred = await createUserWithEmailAndPassword(auth, e, password)
@@ -24,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!inv.exists() || inv.data().status !== 'approved') throw new Error('This email is not pre-approved by the administrator. Please ask the admin to add your email first.')
       const role = inv.data().role || 'FAMILY'
       await setDoc(doc(db, 'users', cred.user.uid), { uid: cred.user.uid, email: e, displayName, role, status: 'active', createdAt: serverTimestamp() })
+      setUser({ uid: cred.user.uid, email: e, displayName, role, status: 'active' })
     } catch (err) { await deleteUser(cred.user).catch(() => signOut(auth)); throw err }
   }
   async function logout() { await signOut(auth) }
