@@ -19,3 +19,7 @@ export interface FamilyMember { id?: string; fullName: string; relation: string;
 
 export interface Guest { id?: string; fullName: string; familyName?: string; side: string; relation?: string; phone?: string; whatsapp?: string; email?: string; address?: string; city?: string; memberCount?: number; adults?: number; children?: number; invitationType?: string; invitationStatus: string; rsvpStatus: string; mealPreference?: string; accommodation?: boolean; transport?: boolean; functionsInvited?: string[]; notes?: string; priority?: string }
 export interface ScheduleEvent { id?: string; eventName: string; functionId: string; date: string; startTime?: string; endTime?: string; venue?: string; address?: string; mapsLink?: string; description?: string; dressCode?: string; contactPerson?: string; notes?: string; status: string }
+
+export interface WeddingDocument { id?: string; title: string; category: string; driveLink: string; fileId?: string; functionId?: string; vendorName?: string; notes?: string }
+export interface ActivityLog { id?: string; action: string; entityType: string; details?: string; userId?: string; userEmail?: string; createdAt?: { seconds: number } }
+export interface Invitation { email: string; role: string; status: string; name?: string }
