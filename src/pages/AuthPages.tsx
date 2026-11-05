@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 function Shell({ title, children }: { title: string; children: React.ReactNode }) {
@@ -8,7 +8,8 @@ function Shell({ title, children }: { title: string; children: React.ReactNode }
     <h2 className="text-lg font-semibold mt-6 mb-3 font-sans">{title}</h2>{children}</div></div>
 }
 export function LoginPage() {
-  const { login, resetPassword } = useAuth(); const nav = useNavigate()
+  const { login, resetPassword, user } = useAuth(); const nav = useNavigate()
+  useEffect(() => { if (user) nav('/') }, [user, nav])
   const [email, setEmail] = useState(''); const [pw, setPw] = useState(''); const [err, setErr] = useState(''); const [msg, setMsg] = useState('')
   return <Shell title="Family Login">
     <form className="space-y-3 font-sans" onSubmit={async (e) => { e.preventDefault(); setErr(''); try { await login(email, pw); nav('/') } catch (x: any) { setErr(x.message || 'Login failed') } }}>
@@ -23,7 +24,8 @@ export function LoginPage() {
     </div></Shell>
 }
 export function RegisterPage() {
-  const { register } = useAuth(); const nav = useNavigate()
+  const { register, user } = useAuth(); const nav = useNavigate()
+  useEffect(() => { if (user) nav('/') }, [user, nav])
   const [name, setName] = useState(''); const [email, setEmail] = useState(''); const [pw, setPw] = useState(''); const [err, setErr] = useState('')
   return <Shell title="Register — administrator-approved emails only">
     <form className="space-y-3 font-sans" onSubmit={async (e) => { e.preventDefault(); setErr(''); try { await register(email, pw, name); nav('/') } catch (x: any) { setErr(x.message || 'Registration failed') } }}>
