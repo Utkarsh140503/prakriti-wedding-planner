@@ -24,7 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // route guard can bounce the user back to /login before the auth listener
     // finishes fetching the profile (bug reported 5 Nov 2026: "login does nothing").
     const snap = await getDoc(doc(db, 'users', cred.user.uid))
-    if (!snap.exists()) { await signOut(auth); throw new Error('Your account profile was not found. If you just registered, please register again \u2014 or ask the admin to check your invitation.') }
+    if (!snap.exists()) { await signOut(auth); throw new Error('Your account profile was not found. If you just registered, please register again — or ask the admin to check your invitation.') }
     const d = snap.data() as AppUser
     if (d.status !== 'active') { await signOut(auth); throw new Error('This account is not active. Please ask the administrator.') }
     setUser({ ...d, uid: cred.user.uid })
