@@ -3,7 +3,6 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import AppLayout from './components/layout/AppLayout'
 import Dashboard from './pages/Dashboard'
 import Checklist from './pages/Checklist'
-import Placeholder from './pages/Placeholder'
 import DocumentsPage from './pages/DocumentsPage'
 import { FunctionsList, FunctionDetail } from './pages/FunctionsPage'
 import FamilyPage from './pages/FamilyPage'
@@ -12,6 +11,8 @@ import VendorsPage from './pages/VendorsPage'
 import { ShoppingPage, SamagriPage } from './pages/ItemsPages'
 import GuestsPage from './pages/GuestsPage'
 import SchedulePage from './pages/SchedulePage'
+import ActivityPage from './pages/ActivityPage'
+import SettingsPage from './pages/SettingsPage'
 import { LoginPage, RegisterPage } from './pages/AuthPages'
 function Guard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -32,8 +33,8 @@ export default function App() {
       <Route path="/samagri" element={<SamagriPage />} />
       <Route path="/schedule" element={<SchedulePage />} />
       <Route path="/documents" element={<DocumentsPage />} />
-      <Route path="/activity" element={<Placeholder title="Activity History" phase="Phase 5" />} />
-      <Route path="/settings" element={<Placeholder title="Settings" phase="Phase 1 (admin invitations are managed in Firestore — see README)" />} />
+      <Route path="/activity" element={<ActivityPage />} />
+      <Route path="/settings" element={<SettingsPage />} />
     </Route>
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes></HashRouter></AuthProvider>
