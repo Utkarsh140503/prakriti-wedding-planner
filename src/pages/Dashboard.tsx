@@ -27,15 +27,16 @@ export default function Dashboard() {
       <p className="font-sans mt-2"><span className="text-4xl font-bold">{daysLeft()}</span> days to go</p>
       <p className="text-sm font-sans opacity-70 mt-1">Venue & city: Pending Confirmation</p>
     </div>
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-5 font-sans">
-      {[['Total tasks', s.total], ['Completed', s.done], ['Pending', s.pending], ['In progress', s.prog], ['Overdue', s.overdue], ['Completion', pct + '%']].map(([l,v]) => (
-        <div key={l as string} className="card p-4 text-center"><p className="text-2xl font-bold text-[#6E1423]">{v}</p><p className="text-xs">{l}</p></div>))}
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-2 font-sans">
+      {[['Total tasks', s.total, '/checklist'], ['Completed', s.done, '/checklist?status=Completed'], ['Pending', s.pending, '/checklist?status=Not%20Started'], ['In progress', s.prog, '/checklist?status=In%20Progress'], ['Overdue', s.overdue, '/checklist?filter=overdue'], ['Completion', pct + '%', '/checklist']].map(([l, v, to]) => (
+        <Link key={l as string} to={to as string} className="card p-4 text-center block hover:border-[#B8912F] hover:shadow transition"><p className="text-2xl font-bold text-[#6E1423]">{v}</p><p className="text-xs">{l}</p><p className="text-[10px] text-[#B8912F] mt-1">Tap to view →</p></Link>))}
     </div>
+    <p className="font-sans text-xs opacity-60 mb-5">Tip: tap any number above to see exactly those tasks. “Pending” here means Not Started — the same definition the checklist uses.</p>
     <div className="grid md:grid-cols-2 gap-5">
       <div className="card p-5"><h3 className="font-bold text-[#6E1423] mb-3">Function progress</h3>
         {WEDDING_FUNCTIONS.map(f => { const ft = tasks.filter(t => t.functionId === f.id); const d = ft.filter(t => t.status === 'Completed').length; const p = ft.length ? Math.round(d/ft.length*100) : 0
-          return <div key={f.id} className="font-sans text-sm mb-2"><div className="flex justify-between"><span>{f.code}. {f.name}</span><span>{ft.length ? p + '%' : 'No tasks yet'}</span></div>
-          <div className="h-2 bg-[#F5EEDD] rounded"><div className="h-2 bg-[#B8912F] rounded" style={{ width: p + '%' }} /></div></div> })}
+          return <Link key={f.id} to={'/functions/' + f.id} className="block font-sans text-sm mb-2 hover:opacity-80"><div className="flex justify-between"><span>{f.code}. {f.name}</span><span>{ft.length ? p + '%' : 'No tasks yet'}</span></div>
+          <div className="h-2 bg-[#F5EEDD] rounded"><div className="h-2 bg-[#B8912F] rounded" style={{ width: p + '%' }} /></div></Link> })}
       </div>
       <div className="space-y-5">
         <div className="card p-5 font-sans"><h3 className="font-bold text-[#6E1423] mb-3 font-serif">Financial overview (from real expense records)</h3>
