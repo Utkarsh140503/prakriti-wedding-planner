@@ -4,7 +4,7 @@ import { WEDDING_FUNCTIONS } from '../data/functions'
 import { useAuth } from '../contexts/AuthContext'
 import type { ScheduleEvent } from '../types'
 const STATUSES = ['Confirmed','Tentative','Pending Confirmation','Cancelled']
-const empty: ScheduleEvent = { eventName: '', functionId: 'wedding', date: '', status: 'Pending Confirmation' }
+const empty: ScheduleEvent = { eventName: '', functionId: 'main-wedding', date: '', status: 'Pending Confirmation' }
 const fname = (id: string) => WEDDING_FUNCTIONS.find(f => f.id === id)?.name || id
 const mapsUrl = (e: ScheduleEvent) => e.mapsLink || (e.address || e.venue ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((e.venue ? e.venue + ', ' : '') + (e.address || '')) : '')
 export default function SchedulePage() {
