@@ -44,6 +44,12 @@ service cloud.firestore {
       allow read: if isMember();
       allow create, update: if canWrite();
       allow delete: if isAdmin();
+      match /comments/{cid} {
+        allow read: if isMember();
+        allow create: if canWrite();
+        allow update: if false;
+        allow delete: if isAdmin() || (signedIn() && resource.data.authorId == request.auth.uid);
+      }
     }
     match /expenses/{doc} {
       allow read: if isMember();
