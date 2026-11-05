@@ -45,7 +45,7 @@ export default function Checklist() {
     </form>}
     {view==='function' || view==='member' ? <div className="space-y-4">
       {groups(view==='function' ? (x) => fname(x.functionId) : (x) => x.ownerName).map(([g, items]) => <div key={g} className="card p-4"><h4 className="font-bold text-[#6E1423] mb-2">{g} <span className="font-sans text-xs font-normal">({items.filter(i => i.status==='Completed').length}/{items.length} done)</span></h4>
-        {items.map(x => <button key={x.id} onClick={() => setSelected(x)} className="w-full text-left font-sans text-sm border-b border-[#F5EEDD] py-1.5 flex justify-between gap-3"><span className="font-semibold">{x.title}</span><span className="text-xs shrink-0">{x.status} \u00B7 {x.priority}</span></button>)}</div>)}
+        {items.map(x => <button key={x.id} onClick={() => setSelected(x)} className="w-full text-left font-sans text-sm border-b border-[#F5EEDD] py-1.5 flex justify-between gap-3"><span className="font-semibold">{x.title}</span><span className="text-xs shrink-0">{x.status} · {x.priority}</span></button>)}</div>)}
       {!filtered.length && <p className="font-sans text-sm opacity-70">No tasks match.</p>}
     </div> : view==='kanban' ? <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-3">
       {STATUSES.map(st => <div key={st} className="card p-3"><h4 className="font-sans font-bold text-sm text-[#6E1423] mb-2">{st} ({filtered.filter(t=>t.status===st).length})</h4>
@@ -61,7 +61,7 @@ export default function Checklist() {
         <td className="p-3">{user?.role==='ADMIN' && <button className="text-red-700 underline text-xs" onClick={()=>{ if(confirm('Delete this task?')) removeTask(t.id!) }}>Delete</button>}</td></tr>)}
       {!filtered.length && <tr><td colSpan={7} className="p-6 text-center opacity-70">No tasks yet. {user?.role==='ADMIN' ? 'Import the template checklist above, or add the first task.' : 'Tasks will appear here once added.'}</td></tr>}
       </tbody></table></div>}
-    <p className="font-sans text-xs opacity-60 mt-3">Tap any task title to open full details \u2014 edit every field, assign a primary owner from the family list, and discuss it in comments. All changes sync in real time.</p>
+    <p className="font-sans text-xs opacity-60 mt-3">Tap any task title to open full details — edit every field, assign a primary owner from the family list, and discuss it in comments. All changes sync in real time.</p>
     {selected && <TaskPanel task={selected} members={members} onClose={() => setSelected(null)} />}
   </div>
 }
