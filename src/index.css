@@ -1,0 +1,19 @@
+@import "tailwindcss";
+@theme {
+  --color-ivory: #FBF7EF;
+  --color-cream: #F5EEDD;
+  --color-gold: #B8912F;
+  --color-goldsoft: #D9C07A;
+  --color-maroon: #6E1423;
+  --color-maroondeep: #4E0E19;
+  --color-leaf: #3F6212;
+  --color-ink: #2B2118;
+}
+html, body { background: #FBF7EF; color: #2B2118; font-family: Georgia, 'Times New Roman', serif; }
+input, select, textarea, button { font-family: system-ui, -apple-system, sans-serif; }
+.card { background: white; border: 1px solid #EADFC6; border-radius: 1rem; box-shadow: 0 1px 3px rgba(110,20,35,.06); }
+.btn-primary { background:#6E1423; color:white; padding:.55rem 1rem; border-radius:.6rem; font-weight:600; }
+.btn-primary:hover { background:#4E0E19; }
+.btn-gold { background:#B8912F; color:white; padding:.55rem 1rem; border-radius:.6rem; font-weight:600; }
+.input { width:100%; border:1px solid #D9C07A; border-radius:.6rem; padding:.55rem .75rem; background:white; }
+.label { font-size:.8rem; font-weight:600; color:#6E1423; margin-bottom:.25rem; display:block; font-family: system-ui, sans-serif; }
