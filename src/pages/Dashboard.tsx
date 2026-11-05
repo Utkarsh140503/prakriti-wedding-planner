@@ -14,8 +14,8 @@ export default function Dashboard() {
   }), [tasks])
   const pct = s.total ? Math.round((s.done / s.total) * 100) : 0
   const fin = useMemo(() => {
-    const planned = expenses.reduce((a,e) => a + (e.estimatedAmount||0), 0)
-    const actual = expenses.reduce((a,e) => a + (e.actualAmount||0), 0)
+    const planned = expenses.reduce((a,e) => a + (e.estimatedCost||0), 0)
+    const actual = expenses.reduce((a,e) => a + (e.actualCost||0), 0)
     const adv = expenses.reduce((a,e) => a + (e.advancePaid||0), 0)
     return { planned, actual, adv, remaining: actual - adv }
   }, [expenses])
